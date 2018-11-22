@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv-extended').load()
 
 const fs = require('fs')
 const path = require('path')
@@ -6,6 +6,8 @@ const _ = require('lodash')
 const csv = require('csv-parser')
 const csvString = require('csv-string')
 const geolib = require('geolib')
+
+console.log(process.env)
 
 const venueCategoryListPath = process.env.PATH_VENUE_CATEGORY
 const storeListPath = process.env.PATH_STORE_LIST
