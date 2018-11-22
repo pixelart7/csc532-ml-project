@@ -8,7 +8,7 @@ const csvString = require('csv-string')
 const geolib = require('geolib')
 
 const venueCategoryListPath = process.env.PATH_VENUE_CATEGORY
-const storeListPath = process.env.STORE_LIST
+const storeListPath = process.env.PATH_STORE_LIST
 const trainStationListPath = process.env.PATH_TRAIN_STATION_LIST
 
 const meterRedius = 500
