@@ -17,7 +17,8 @@ const meterRedius1 = 500
 const meterRedius2 = 1000
 const meterRedius3 = 2000
 
-const reportEvery = 50
+const reportEvery = 10
+const saveEvery = 50
 
 function write (path, text) {
   return new Promise ((resolve, reject) => {
@@ -52,16 +53,27 @@ function createColumnForVenueCategory (obj, venueCategory) {
   return obj
 }
 
-function storeListNearbyCount (store, venueCategory) {
-  const newStoreList = []
-  store.forEach((row, i) => { // o(n^2)
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+async function storeListNearbyCount (store, venueCategory) {
+  let newStoreList = []
+  await asyncForEach(store, async (row, i) => { // o(n^2)
 
     if (i % reportEvery == 0) console.log("At: " + i + ", Time: " + new Date())
+    if (i !== 0 && i % saveEvery == 0) {
+      console.log(`> Saving Chunk ${i - saveEvery}-${i - 1}...`)
+      await write(path.join(__dirname, `output-${i - saveEvery}-${i - 1}.csv`), csvString.stringify([Object.keys(newStoreList[0]), ...newStoreList]))
+      newStoreList = []
+    }
 
     const filledRow = createColumnForVenueCategory(row, venueCategory)
     iLat = parseFloat(row['latitude'])
     iLong = parseFloat(row['longitude'])
-    store.forEach((compareRow, j) => {
+    await asyncForEach(store, async (compareRow, j) => {
       if ( i == j) return;
       jLat = parseFloat(compareRow['latitude'])
       jLong = parseFloat(compareRow['longitude'])
@@ -84,8 +96,13 @@ function storeListNearbyCount (store, venueCategory) {
       }
     })
     newStoreList.push(filledRow)
+
+    if (i === store.length - 1) {
+      await write(path.join(__dirname, `output-last.csv`), csvString.stringify([Object.keys(newStoreList[0]), ...newStoreList]))
+    }
+
   })
-  return newStoreList
+  
 }
 
 (async () => {
@@ -97,12 +114,12 @@ function storeListNearbyCount (store, venueCategory) {
     // storeList = storeList.slice(0, 100)
 
     console.log('Data size: ' + storeList.length )
-    const res = storeListNearbyCount(storeList, venueCategoryList)
+    const res = await storeListNearbyCount(storeList, venueCategoryList)
     // const res2 = storeListNearbyCount(storeList, venueCategoryList)
 
     console.log('done')
 
-    await write(path.join(__dirname, 'output.csv'), csvString.stringify([Object.keys(res[0]), ...res]))
+    // await write(path.join(__dirname, 'output-last-chunk.csv'), csvString.stringify([Object.keys(res[0]), ...res]))
   } catch (e) {
     console.error(e)
     // Deal with the fact the chain failed
