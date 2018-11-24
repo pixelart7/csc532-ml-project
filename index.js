@@ -17,8 +17,8 @@ const meterRedius1 = 500
 const meterRedius2 = 1000
 const meterRedius3 = 2000
 
-const reportEvery = 10
-const saveEvery = 50
+const reportEvery = 50
+const saveEvery = 500
 
 function write (path, text) {
   return new Promise ((resolve, reject) => {
