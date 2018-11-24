@@ -13,7 +13,9 @@ const venueCategoryListPath = process.env.PATH_VENUE_CATEGORY
 const storeListPath = process.env.PATH_STORE_LIST
 const trainStationListPath = process.env.PATH_TRAIN_STATION_LIST
 
-const meterRedius = 500
+const meterRedius1 = 500
+const meterRedius2 = 1000
+const meterRedius3 = 2000
 
 const reportEvery = 50
 
@@ -43,7 +45,9 @@ function read (path) {
 
 function createColumnForVenueCategory (obj, venueCategory) {
   venueCategory.forEach((elm) => {
-    obj[elm['venueCategory']] = 0
+    obj[`${meterRedius1}-${elm['venueCategory']}`] = 0
+    obj[`${meterRedius2}-${elm['venueCategory']}`] = 0
+    obj[`${meterRedius3}-${elm['venueCategory']}`] = 0
   })
   return obj
 }
@@ -69,8 +73,14 @@ function storeListNearbyCount (store, venueCategory) {
         latitude: jLat,
         longitude: jLong
       })
-      if (distance <= meterRedius) {
-        filledRow[compareRow['venueCategory']] += 1
+      if (distance <= meterRedius1) {
+        filledRow[`${meterRedius1}-${compareRow['venueCategory']}`] += 1
+      }
+      if (distance <= meterRedius2) {
+        filledRow[`${meterRedius2}-${compareRow['venueCategory']}`] += 1
+      }
+      if (distance <= meterRedius3) {
+        filledRow[`${meterRedius3}-${compareRow['venueCategory']}`] += 1
       }
     })
     newStoreList.push(filledRow)
@@ -84,11 +94,11 @@ function storeListNearbyCount (store, venueCategory) {
     var storeList = await read(storeListPath)
     var trainList = await read(trainStationListPath)
 
-    // storeList = storeList.slice(0, 2000)
+    // storeList = storeList.slice(0, 100)
 
     console.log('Data size: ' + storeList.length )
     const res = storeListNearbyCount(storeList, venueCategoryList)
-    const res2 = storeListNearbyCount(storeList, venueCategoryList)
+    // const res2 = storeListNearbyCount(storeList, venueCategoryList)
 
     console.log('done')
 
